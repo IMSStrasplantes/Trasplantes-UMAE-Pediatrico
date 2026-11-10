@@ -1,0 +1,15 @@
+{
+  "name": "UMAE Hospital de Pediatría CMNO",
+  "short_name": "Trasplantes CMNO",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#006341",
+  "theme_color": "#006341",
+  "icons": [
+    {
+      "src": "WhatsApp Image 2026-10-26 at 10.20.34 AM.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

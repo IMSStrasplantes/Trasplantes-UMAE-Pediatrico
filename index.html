@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMAE Hospital de Pediatría CMNO</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- LOGIN CON VALIDACIÓN DE AVISO DE PRIVACIDAD OBLIGATORIO -->
+    <div id="login-container" class="login-container">
+        <div class="login-box" style="max-width: 480px;">
+            <h2 style="color: #006341; margin-bottom: 5px;">UMAE Hospital de Pediatría CMNO</h2>
+            <p style="color: gray; font-size: 14px; margin-bottom: 20px;">Control de Protocolos de Trasplante - Acceso Médico</p>
+            
+            <input type="email" id="login-email" placeholder="Correo electrónico" class="login-input">
+            <input type="password" id="login-password" placeholder="Contraseña" class="login-input">
+            
+            <div style="background: #eef9f5; border: 1px solid #006341; padding: 12px; border-radius: 6px; margin: 15px 0; text-align: left;">
+                <label style="font-size: 12px; color: #333; display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="check-acepto-privacidad" style="margin-top: 2px; transform: scale(1.2);">
+                    <span>He leído, comprendido y <strong>estoy de acuerdo</strong> con el Aviso de Privacidad Institucional para el manejo de datos médicos confidenciales.</span>
+                </label>
+                <div style="text-align: right; margin-top: 8px;">
+                    <button type="button" id="btn-abrir-privacidad" style="background: none; border: none; color: #006341; text-decoration: underline; cursor: pointer; font-size: 11px; font-weight: bold; padding: 0;">📜 Leer Aviso de Privacidad Completo</button>
+                </div>
+            </div>
+
+            <button type="button" id="btn-login" class="btn-guardar">Iniciar Sesión</button>
+            <p id="login-error" style="color: red; font-size: 13px; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- MODAL DE AVISO DE PRIVACIDAD COMPLETO -->
+    <div id="modal-privacidad" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 25px; border-radius: 10px; max-width: 550px; width: 90%; position: relative; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            <button type="button" id="btn-cerrar-privacidad" style="position: absolute; right: 15px; top: 15px; background: #eee; border: none; font-weight: bold; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">X</button>
+            <h2 style="color: #006341; margin-bottom: 15px; font-size: 18px;">Aviso de Privacidad Integral</h2>
+            <div style="font-size: 13px; color: #444; line-height: 1.6; text-align: justify;">
+                <p>La <strong>UMAE Hospital de Pediatría del Centro Médico Nacional de Occidente (CMNO)</strong>, en cumplimiento con la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados, es responsable del tratamiento de los datos personales y clínicos recabados en este sistema de control de trasplantes.</p>
+            </div>
+            <button type="button" id="btn-entendido-privacidad" style="margin-top: 20px; width: 100%; background: #006341; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">Entendido y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="app-container" style="display: none;">
+        <header class="header">
+            <div class="header-content" style="position: relative;">
+                <h1>UMAE Hospital de Pediatría CMNO</h1>
+                <p>Servicio de Nefrología y Trasplante Pediátrico</p>
+                
+                <div style="position: absolute; right: 0; top: -10px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <span id="perfil-usuario" style="font-weight: bold; font-size: 14px; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px;">👨‍⚕️ Doctor</span>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="btn-historial" class="btn-logout" style="position:relative; right:auto; top:auto; background: #f1c40f; color: #333; border:none;">Historial</button>
+                        <button type="button" id="btn-logout-sesion" class="btn-logout" style="position:relative; right:auto; top:auto;">Salir</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="search-container">
+                <!-- CONTADORES -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 5px; margin-bottom: 15px; text-align: center;">
+                    <div style="background: #eef2f5; padding: 6px; border-radius: 6px; border-top: 3px solid #006341;">
+                        <span style="font-size: 9px; color: #555; display: block;">TOTAL</span>
+                        <strong id="contador-total" style="font-size: 15px; color: #006341;">0</strong>
+                    </div>
+                    <div style="background: #fff3cd; padding: 6px; border-radius: 6px; border-top: 3px solid #ffc107;">
+                        <span style="font-size: 9px; color: #856404; display: block;">PROCESO</span>
+                        <strong id="contador-proceso" style="font-size: 15px; color: #856404;">0</strong>
+                    </div>
+                    <div style="background: #cce5ff; padding: 6px; border-radius: 6px; border-top: 3px solid #007bff;">
+                        <span style="font-size: 9px; color: #004085; display: block;">COMITÉ</span>
+                        <strong id="contador-comite" style="font-size: 15px; color: #004085;">0</strong>
+                    </div>
+                    <div style="background: #d4edda; padding: 6px; border-radius: 6px; border-top: 3px solid #28a745;">
+                        <span style="font-size: 9px; color: #155724; display: block;">ENLISTADOS</span>
+                        <strong id="contador-enlistado" style="font-size: 15px; color: #155724;">0</strong>
+                    </div>
+                    <div style="background: #d1c4e9; padding: 6px; border-radius: 6px; border-top: 3px solid #673ab7;">
+                        <span style="font-size: 9px; color: #4527a0; display: block;">TRASPLANT.</span>
+                        <strong id="contador-trasplantado" style="font-size: 15px; color: #4527a0;">0</strong>
+                    </div>
+                    <div style="background: #e2e3e5; padding: 6px; border-radius: 6px; border-top: 3px solid #6c757d;">
+                        <span style="font-size: 9px; color: #383d41; display: block;">FINADOS</span>
+                        <strong id="contador-finados" style="font-size: 15px; color: #383d41;">0</strong>
+                    </div>
+                </div>
+
+                <!-- 4 FILTROS -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; align-items: flex-end;">
+                    <div>
+                        <label style="font-weight: bold; color: #006341; font-size: 11px; display: block; margin-bottom: 3px;">Estatus:</label>
+                        <select id="filtro-estado-paciente" style="width: 100%; padding: 8px; border: 2px solid #006341; border-radius: 6px; font-weight: bold; color: #333; font-size: 11px;">
+                            <option value="todos">🟢 Todos Activos</option>
+                            <option value="EN PROCESO">⏳ En Proceso</option>
+                            <option value="COMITE">⚖️ En Comité</option>
+                            <option value="ENLISTADO">✅ Enlistados</option>
+                            <option value="TRASPLANTADO">🎉 Trasplantados</option>
+                            <option value="finados">⚫ Finados</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #006341; font-size: 11px; display: block; margin-bottom: 3px;">Tratamiento:</label>
+                        <select id="filtro-modalidad" style="width: 100%; padding: 8px; border: 2px solid #006341; border-radius: 6px; font-weight: bold; color: #333; font-size: 11px;">
+                            <option value="todas">📂 Todos</option>
+                            <option value="Pre-diálisis">Pre-diálisis</option>
+                            <option value="Diálisis Peritoneal">Diálisis Peritoneal</option>
+                            <option value="Hemodiálisis">Hemodiálisis</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #006341; font-size: 11px; display: block; margin-bottom: 3px;">Origen Donador:</label>
+                        <select id="filtro-origen" style="width: 100%; padding: 8px; border: 2px solid #006341; border-radius: 6px; font-weight: bold; color: #333; font-size: 11px;">
+                            <option value="todos">🧬 Todos</option>
+                            <option value="VIVO RELACIONADO">Vivo Relacionado</option>
+                            <option value="VIVO NO RELACIONADO">Vivo No Relacionado</option>
+                            <option value="CADAVÉRICO">Cadavérico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #006341; font-size: 11px; display: block; margin-bottom: 3px;">Hemotipo Receptor:</label>
+                        <select id="filtro-hemotipo" style="width: 100%; padding: 8px; border: 2px solid #006341; border-radius: 6px; font-weight: bold; color: #333; font-size: 11px;">
+                            <option value="todos">🩸 Todos</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="button" id="btn-nuevo-paciente" style="background: #28a745; color: white; border: none; padding: 9px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 12px;">➕ Nuevo</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <p style="font-size: 14px; font-weight: bold; color: #006341; margin: 0;">Búsqueda por nombre o NSS:</p>
+                    <span id="badge-contador-modalidad" style="font-size: 12px; background: #006341; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold;">Mostrando: 0 resultados</span>
+                </div>
+
+                <div class="search-row">
+                    <input type="radio" name="tipoBusqueda" id="radioNombre" value="nombre" checked>
+                    <label for="radioNombre">Nombre:</label>
+                    <input type="text" id="busquedaNombre" placeholder="Buscar receptor o donador...">
+                </div>
+                <div class="search-row">
+                    <input type="radio" name="tipoBusqueda" id="radioNss" value="nss">
+                    <label for="radioNss">NSS:</label>
+                    <input type="text" id="busquedaNss" placeholder="Buscar por NSS..." disabled>
+                </div>
+            </div>
+
+            <div id="lista-pacientes" class="pacientes-container">
+                <p class="cargando">Cargando pacientes desde la base de datos...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE DETALLES Y EDICIÓN PRINCIPAL -->
+    <div id="modal-paciente" class="modal-detalles">
+        <div class="modal-contenido">
+            <button type="button" class="cerrar-modal" id="btn-cerrar">X</button>
+            <h2 class="titulo-modal" id="modal-nombre">Nombre del Paciente</h2>
+            <div id="formulario-edicion"></div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="button" class="btn-guardar" id="btn-guardar-cambios" style="width: 100%;">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTANAS PANORÁMICAS -->
+    <div id="modal-panel-datos" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #006341; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">👤 Datos Generales</h2><button type="button" id="btn-cerrar-panel-datos" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-datos" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-datos" style="background: #006341; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-protocolo" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #2980b9; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">📅 Fechas de Protocolo e Hitos</h2><button type="button" id="btn-cerrar-panel-proto" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-protocolo" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-proto" style="background: #2980b9; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-valoraciones" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #27ae60; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">📋 Valoraciones Médicas</h2><button type="button" id="btn-cerrar-panel-val" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-valoraciones" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-val" style="background: #27ae60; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-labs" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #e67e22; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">🧪 Laboratorios Generales</h2><button type="button" id="btn-cerrar-panel-labs" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-labs" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-labs" style="background: #e67e22; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-imagen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #8e44ad; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">🩻 Estudios de Imagen</h2><button type="button" id="btn-cerrar-panel-img" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-imagen" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-img" style="background: #8e44ad; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-vacunas" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #16a085; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">💉 Cartilla de Vacunación</h2><button type="button" id="btn-cerrar-panel-vac" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-vacunas" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-vac" style="background: #16a085; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-infeccioso" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #c0392b; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">🧬 Panel Infeccioso Avanzado</h2><button type="button" id="btn-cerrar-panel-infeccioso" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-infeccioso" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-inf" style="background: #c0392b; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-inmunologico" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #34495e; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">🛡️ Inmunología y Metabolismo</h2><button type="button" id="btn-cerrar-panel-inm" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-inmunologico" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-inm" style="background: #34495e; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-panel-donador" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: white; width: 96vw; height: 92vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.4);">
+            <div style="background: #d35400; color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 20px;">🩸 Protocolo del Donador Vivo (IMSS)</h2><button type="button" id="btn-cerrar-panel-donador" style="background: #ff5252; color: white; border: none; font-weight: bold; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">X</button></div>
+            <div id="contenido-panel-donador" style="padding: 25px; overflow-y: auto; flex: 1; background: #f8f9fa;"></div>
+            <div style="background: #eee; padding: 12px 25px; text-align: right;"><button type="button" id="btn-guardar-panel-donador" style="background: #d35400; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer;">💾 Guardar Protocolo Donador</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE HISTORIAL -->
+    <div id="modal-historial" class="modal-detalles">
+        <div class="modal-contenido" style="max-height: 80vh;">
+            <button type="button" class="cerrar-modal" id="btn-cerrar-historial">X</button>
+            <h2 class="titulo-modal" style="color:#d35400;">Historial de Modificaciones</h2>
+            <p style="font-size:13px; color:gray; margin-bottom: 15px;">Últimas 50 modificaciones en el sistema.</p>
+            <div id="lista-historial" style="display:flex; flex-direction:column; gap:10px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
